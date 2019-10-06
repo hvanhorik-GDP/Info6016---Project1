@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="cListenSocket.cpp">
+      <Filter>Sockets</Filter>
+    </ClCompile>
+    <ClCompile Include="cNetwork.cpp">
+      <Filter>Sockets</Filter>
+    </ClCompile>
+    <ClCompile Include="cSocket.cpp">
+      <Filter>Sockets</Filter>
+    </ClCompile>
+    <ClCompile Include="cSocketException.cpp">
+      <Filter>Sockets</Filter>
+    </ClCompile>
+    <ClCompile Include="cConnectSocket.cpp">
+      <Filter>Sockets</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cListenSocket.h">
+      <Filter>Sockets</Filter>
+    </ClInclude>
+    <ClInclude Include="cNetwork.h">
+      <Filter>Sockets</Filter>
+    </ClInclude>
+    <ClInclude Include="cSocket.h">
+      <Filter>Sockets</Filter>
+    </ClInclude>
+    <ClInclude Include="cSocketException.h">
+      <Filter>Sockets</Filter>
+    </ClInclude>
+    <ClInclude Include="cConnectSocket.h">
+      <Filter>Sockets</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Sockets">
+      <UniqueIdentifier>{61105831-93e8-4f9e-a384-40506171c33f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
