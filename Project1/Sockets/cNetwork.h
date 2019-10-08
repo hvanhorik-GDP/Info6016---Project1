@@ -15,10 +15,12 @@ public:
 	void Initialize();
 	void Cleanup();
 
-	cListenSocket& CreateListenSocket(int backlog = 10);
-	cConnectSocket& CreateConnectSocket();
+	cListenSocket* CreateListenSocket(int backlog = 10);
+	cListenSocket* GetListenSocket();
+	cConnectSocket* CreateConnectSocket();
 	void AddSocket(cSocket* in);
 	void RemoveSocket(cSocket* out);
+	cNetwork::mapSocket& GetMapSockets();
 
 private:
 	bool m_isInitialized = false;

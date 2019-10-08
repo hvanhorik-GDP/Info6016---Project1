@@ -17,7 +17,7 @@ cConnectSocket::cConnectSocket(int backlog)
 
 cConnectSocket::~cConnectSocket()
 {
-	Close();
+//	Close();
 	Free();
 }
 
@@ -47,6 +47,7 @@ void cConnectSocket::GetInfo(const std::string &ip, const std::string& port)
 	cSocketException::throwIfError(m_iResult);
 	std::cout << *m_addrInfo;
 }
+
 
 cSocket* cConnectSocket::Connect()
 {

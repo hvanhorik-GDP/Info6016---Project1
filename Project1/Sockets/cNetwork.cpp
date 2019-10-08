@@ -8,6 +8,8 @@
 #include <iostream>
 #include <cassert>
 
+extern bool gDebug;
+
 cNetwork::cNetwork() 
 {
 }
@@ -23,7 +25,8 @@ void cNetwork::Initialize()
 	// Initialize Winsock
 	m_iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	cSocketException::throwIfError(m_iResult);
-	std::cout << "WSAStartup() was successful!" << std::endl;
+	if (gDebug)
+		std::cout << "WSAStartup() was successful!" << std::endl;
 }
 
 void cNetwork::Cleanup()
@@ -44,18 +47,24 @@ void cNetwork::Cleanup()
 		::WSACleanup();
 }
 
-cListenSocket& cNetwork::CreateListenSocket(int backlog)
+cListenSocket* cNetwork::CreateListenSocket(int backlog)
 {
 	assert(m_listenSocket == 0);
 	m_listenSocket = new cListenSocket(backlog);
-	return *m_listenSocket;
+	return m_listenSocket;
 }
 
-cConnectSocket& cNetwork::CreateConnectSocket()
+cListenSocket* cNetwork::GetListenSocket()
+{
+	assert(m_listenSocket);
+	return m_listenSocket;
+}
+
+cConnectSocket* cNetwork::CreateConnectSocket()
 {
 	assert(m_connectsocket == 0);
 	m_connectsocket = new cConnectSocket();
-	return *m_connectsocket;	
+	return m_connectsocket;	
 }
 
 void cNetwork::AddSocket(cSocket* in)
@@ -74,4 +83,9 @@ void cNetwork::RemoveSocket(cSocket* in)
 		m_mapSockets.erase(it);
 		delete sock;
 	}
+}
+
+cNetwork::mapSocket& cNetwork::GetMapSockets()
+{
+	return m_mapSockets;
 }

@@ -10,8 +10,6 @@ class cChat
 public:
 	// Map ID's to strings;
 	typedef std::map<cCommand::tUID, std::string> mapUID;
-	// Map rooms to strings
-//	typedef std::map<cCommand::tRoom, std::string> mapRoom;
 	// Map strings to commands
 	typedef std::map<cCommand::eCommand, std::string> mapCommands;
 
@@ -37,10 +35,12 @@ public:
 protected:
 	mapUID m_All_UIDs;
 	cCommand::tUID m_nextUID = cCommand::tUID_System + 1;
-//	mapRoom m_All_Rooms;
 	cRooms m_Rooms;
 	cCommand::tRoom m_nextRoom = 1;
 	static mapCommands m_All_Commands;
+private:
+	cChat(const cChat&);
+	cChat& operator=(const cChat&);
 };
 
 // Commands are:

@@ -12,6 +12,7 @@ public:
 	virtual ~cListenSocket();
 	void Free();
 	void GetInfo(const std::string& port);
+//	virtual void SetNonBlocking();
 	void Create();
 	void Bind();
 	void Listen();

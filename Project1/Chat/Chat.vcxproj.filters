@@ -3,13 +3,15 @@
   <ItemGroup>
     <ClCompile Include="cCommand.cpp" />
     <ClCompile Include="cChat.cpp" />
-    <ClCompile Include="cChatServer.cpp" />
     <ClCompile Include="cRooms.cpp" />
+    <ClCompile Include="cChat_Server.cpp" />
+    <ClCompile Include="cChat_Client.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cCommand.h" />
     <ClInclude Include="cChat.h" />
-    <ClInclude Include="cChatServer.h" />
     <ClInclude Include="cRooms.h" />
+    <ClInclude Include="cChat_Server.h" />
+    <ClInclude Include="cChat_Client.h" />
   </ItemGroup>
 </Project>

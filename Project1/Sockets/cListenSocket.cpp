@@ -63,6 +63,20 @@ void cListenSocket::Create()
 	std::cout << "socket() is created!" << std::endl;
 }
 
+//void cListenSocket::SetNonBlocking()
+//{
+//	u_long iMode = 1;
+//
+//	m_iResult = ioctlsocket(m_id, FIONBIO, &iMode);
+//	if (m_iResult)
+//	{
+//		m_iResult = WSAGetLastError();
+//		cSocketException::throwError(m_iResult);
+//	}
+////	rc = ioctl(listen_sd, FIONBIO, (char*)& on);
+//
+//}
+
 void cListenSocket::Bind()
 {
 	// #2 Bind - Setup the TCP listening socket
@@ -97,13 +111,20 @@ void cListenSocket::Listen()
 
 cSocket* cListenSocket::Accept()
 {
-	std::cout << "Waiting for client to connect..." << std::endl;
+//	std::cout << "Waiting for client to connect..." << std::endl;
 	SOCKET acceptSocket = accept(m_id, NULL, NULL);
 	if (acceptSocket == INVALID_SOCKET)
 	{
 		m_iResult = WSAGetLastError();
-		std::cout << "accept() failed with error: " << m_iResult;
-		cSocketException::throwError(m_iResult);
+		if (m_iResult == WSAEWOULDBLOCK)
+		{
+			return NULL;
+		}
+		else
+		{
+			std::cout << "accept() failed with error: " << m_iResult;
+			cSocketException::throwError(m_iResult);
+		}
 	}
 	std::cout << "accept() is OK!" << std::endl;
 	std::cout << "Accepted client on socket: " << acceptSocket << std::endl;

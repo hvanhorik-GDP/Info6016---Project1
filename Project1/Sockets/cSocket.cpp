@@ -8,6 +8,8 @@
 #include <WinSock2.h>
 #include <iostream>
 
+extern bool gDebug;					// Check for global debug
+
 using namespace std;
 
 cSocket::cSocket()
@@ -27,7 +29,7 @@ cSocket::~cSocket()
 
 void cSocket::Close() 	// NoThrow so safe on destruction
 {
-	if (m_id != INVALID_SOCKET)
+	if (m_id != INVALID_SOCKET && m_isOpen)
 	{
 		int result = closesocket(m_id);
 		// No exception on close
@@ -41,32 +43,38 @@ void cSocket::Close() 	// NoThrow so safe on destruction
 
 std::ostream& operator<<(std::ostream& stream, const addrinfo& info)
 {
-
-	stream
-		<< "getaddrinfo() is good!" << std::endl
-		<< "    flags: " << info.ai_flags << std::endl
-		<< "    ai_family: " << info.ai_family << std::endl
-		<< "    ai_socktype: " << info.ai_socktype << std::endl
-		<< "    ai_protocol: " << info.ai_protocol << std::endl;
-
+	if (gDebug)
+	{
+		stream
+			<< "getaddrinfo() is good!" << std::endl
+			<< "    flags: " << info.ai_flags << std::endl
+			<< "    ai_family: " << info.ai_family << std::endl
+			<< "    ai_socktype: " << info.ai_socktype << std::endl
+			<< "    ai_protocol: " << info.ai_protocol << std::endl;
+	}
 	return stream;
 }
 
 std::size_t cSocket::Recieve(char* buffer, std::size_t length)
 {
-	cout << "cSocket - " << "Waiting to receive data from the client..." << endl;
+//	cout << "cSocket - " << "Waiting to receive data from the client..." << endl;
 	m_iResult = recv(m_id, buffer, (int)length, 0);
 	if (m_iResult > 0)
 	{
 		// We have received data successfully!
 		// iResult is the number of bytes received
-		cout << "cSocket - " << "Bytes received:" << m_iResult << endl;
+		if (gDebug)
+			cout << "cSocket - " << "Bytes received:" << m_iResult << endl;
 	}
 	else if (m_iResult < 0)
 	{
 		m_iResult = WSAGetLastError();
-		cout << "cSocket - " << "Recieve failed with error: " << m_iResult << endl;
-		cSocketException::throwError(m_iResult);
+		if (m_iResult != WSAEWOULDBLOCK)
+		{
+			cout << "cSocket - " << "Recieve failed with error: " << m_iResult << endl;
+			m_iResult = 0;				// Just fake no data
+		}
+		return m_iResult;
 	}
 	else // m_iResult == 0
 	{
@@ -86,10 +94,28 @@ void cSocket::Send(const char* buffer, std::size_t length)
 	}
 	else
 	{
-		cout << "cSocket - " << "Bytes sent: " << m_iResult << endl;
+		if (gDebug)
+			cout << "cSocket - " << "Bytes sent: " << m_iResult << endl;
 	}
 }
 
+void cSocket::SetNonBlocking()
+{
+	//-------------------------
+	// Set the socket I/O mode: In this case FIONBIO
+	// enables or disables the blocking mode for the 
+	// socket based on the numerical value of iMode.
+	// If iMode = 0, blocking is enabled; 
+	// If iMode != 0, non-blocking mode is enabled.
+	u_long iMode = 1;
+
+	m_iResult = ioctlsocket(m_id, FIONBIO, &iMode);
+	if (m_iResult)
+	{
+		m_iResult = WSAGetLastError();
+		cSocketException::throwError(m_iResult);
+	}
+}
 
 SOCKET cSocket::GetID()
 {

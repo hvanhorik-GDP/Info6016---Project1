@@ -16,6 +16,7 @@ public:
 	cSocket(SOCKET id);
 	virtual ~cSocket();
 	void Close();		// NoThrow so safe on destruction
+	void SetNonBlocking();
 	std::size_t Recieve(char* buffer, std::size_t length);
 	void Send(const char* buffer, std::size_t length);
 	SOCKET GetID(); 

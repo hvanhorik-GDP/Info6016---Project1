@@ -18,6 +18,8 @@ public:
 		eRoomCreated,
 		eRoomConnect,
 		eRoomConnected,
+		eRoomLeave,
+		eRoomLeft,
 		eMessage,
 		eMaxMessage = eMessage,
 		eUnknown
@@ -63,7 +65,7 @@ private:
 	static unsigned short UnpackBE(char* buffer);
 
 	// Some static variables
-	static const std::size_t tBufferLength = 1024;
+	static const std::size_t tBufferLength = 512;		// Make him work to check overflow
 
 	// Format of the raw buffer - Note it will be packed/unpacked correctly
 	// before sending to the network - This is just so we get offsets into the 
@@ -76,7 +78,7 @@ private:
 		char			m_room[2];				// 2 bytes for a room
 		char			m_messageLength[2];		// 2 bytes for message length
 		static const std::size_t tHeaderLength = 2 + 1 + 2 + 2 + 2;
-		char			m_message[tBufferLength - tHeaderLength-1];	// Less one for pad
+		char			m_message[tBufferLength - tHeaderLength];	// The message - total - header
 		char			m_pad;					// Zero terminate padding
 	};
 
@@ -88,3 +90,4 @@ private:
 
 };
 
+std::ostream& operator<<(std::ostream& stream, cCommand::eCommand in);

@@ -13,31 +13,21 @@ cRoom::~cRoom()
 
 void cRoom::AddUID(cCommand::tUID UID)
 {
-	m_uids.push_back(UID);
+	m_uids[UID] = GetName();
 }
 
 void cRoom::RemoveUID(cCommand::tUID UID)
 {
-	listUIDs::iterator it;
-
-	// Fetch the iterator of element with value 'the'
-	it = std::find(m_uids.begin(), m_uids.end(), UID);
-
-	// Check if iterator points to end or not
-	if (it != m_uids.end())
-		m_uids.erase(it);
+	if (m_uids.find(UID) != m_uids.end())
+		m_uids.erase(UID);
 }
 
 bool cRoom::HasUID(cCommand::tUID UID) const
 {
-	// Fetch the iterator of element with value 'the'
-	auto it = std::find(m_uids.begin(), m_uids.end(), UID);
-
-	// Check if iterator points to end or not
-	return (it != m_uids.end());
+	return (m_uids.find(UID) != m_uids.end());
 }
 
-cRoom::listUIDs& cRoom::GetListUIDs()
+cRoom::mapUIDs& cRoom::GetMapUIDs()
 {
 	return m_uids;
 }
@@ -60,16 +50,16 @@ cRooms::~cRooms()
 	}
 }
 
-cRoom& cRooms::AddRoom(cCommand::tRoom room, const std::string& name)
+cRoom* cRooms::AddRoom(cCommand::tRoom room, const std::string& name)
 {
 	cRoom* newRoom = new cRoom(room, name);
 	m_mapRooms[room] = newRoom;
-	return *m_mapRooms[room];
+	return m_mapRooms[room];
 }
 
-cRoom& cRooms::GetRoom(cCommand::tRoom room)
+cRoom* cRooms::GetRoom(cCommand::tRoom room)
 {
-	return *m_mapRooms[room];
+	return m_mapRooms[room];
 }
 
 void cRooms::RemoveRoom(cCommand::tRoom room)

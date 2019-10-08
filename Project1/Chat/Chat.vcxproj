@@ -182,13 +182,15 @@ xcopy /S /D /Y "$(ProjectDir)libraries\$(Platform)\$(Configuration)\*" "$(Soluti
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cChatServer.cpp" />
+    <ClCompile Include="cChat_Server.cpp" />
+    <ClCompile Include="cChat_Client.cpp" />
     <ClCompile Include="cCommand.cpp" />
     <ClCompile Include="cChat.cpp" />
     <ClCompile Include="cRooms.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cChatServer.h" />
+    <ClInclude Include="cChat_Server.h" />
+    <ClInclude Include="cChat_Client.h" />
     <ClInclude Include="cCommand.h" />
     <ClInclude Include="cChat.h" />
     <ClInclude Include="cRooms.h" />

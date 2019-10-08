@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstring>
 
+extern bool gDebug;				// External debug flag
+
 cCommand::cCommand(
 	eCommand command, 
 	tUID uid, 
@@ -12,14 +14,18 @@ cCommand::cCommand(
 	unsigned short size)
 	:  m_RawBuffer(new sRawBuffer())
 {
-	assert(size <= GetMaxMessageLength());
+	if (size > GetMaxMessageLength())
+	{
+		std::cout << "command buffer overflow... truncating" << size << std::endl;
+		size = GetMaxMessageLength();
+	}
 	ClearRawBuffer();
 	m_RawBuffer->m_Command = command;
 	PackBE(m_RawBuffer->m_uid, uid);
 	PackBE(m_RawBuffer->m_room, room);
 	PackBE(m_RawBuffer->m_messageLength, size);
 	std::memcpy(m_RawBuffer->m_message, message, size);
-	PackBE(m_RawBuffer->m_TotalLength, GetHeaderLength() + 2 + size);
+	PackBE(m_RawBuffer->m_TotalLength, GetHeaderLength() + size);
 }
 
 cCommand::cCommand(
@@ -27,16 +33,30 @@ cCommand::cCommand(
 	unsigned short size)
 	: m_RawBuffer(new sRawBuffer())
 {
-	assert(size <= GetMaxRawLength());
+	if (size > GetMaxRawLength())
+	{
+		std::cout << "command buffer overflow... truncating" << size << std::endl;
+		size = GetMaxRawLength();
+	}
 	memcpy(m_RawBuffer, rawBuffer, size);
 	// Lets do some checks on the buffer;
 	unsigned short sizeBuffer = UnpackBE(m_RawBuffer->m_TotalLength);
+	if (sizeBuffer > GetMaxRawLength())
+	{
+		std::cout << "command buffer overflow... truncating" << sizeBuffer << std::endl;
+		size = GetMaxRawLength();
+	}
 	assert(size <= GetMaxRawLength());
 	eCommand command = (eCommand)m_RawBuffer->m_Command;
 	assert(command <= eMaxMessage);
 	tUID uid = UnpackBE(m_RawBuffer->m_uid);
 	tRoom room = UnpackBE(m_RawBuffer->m_room);
 	unsigned short messageLength = UnpackBE(m_RawBuffer->m_messageLength);
+	if (messageLength > GetMaxMessageLength())
+	{
+		std::cout << "command buffer overflow... truncating" << messageLength << std::endl;
+		messageLength = GetMaxMessageLength();
+	}
 	assert(messageLength <= GetMaxMessageLength());
 }
 
@@ -66,7 +86,15 @@ const char* cCommand::GetRawMessage() const
 
 unsigned short cCommand::GetRawLength() const
 {
-	return UnpackBE(m_RawBuffer->m_TotalLength) + 2;;
+	auto size = UnpackBE(m_RawBuffer->m_TotalLength);
+	// Check for overflow
+	if (size > GetMaxRawLength())
+	{
+		std::cout << "command buffer overflow... truncating" << size << std::endl;
+		size = GetMaxRawLength();
+	}
+
+	return size;
 }
 
 const char* cCommand::GetTheMessage() const
@@ -77,7 +105,14 @@ const char* cCommand::GetTheMessage() const
 
 unsigned short cCommand::GetMessageLength() const
 {
-	return UnpackBE(m_RawBuffer->m_messageLength);
+	auto size = UnpackBE(m_RawBuffer->m_messageLength);
+	// Check for overflow
+	if (size > GetMaxMessageLength())
+	{
+		std::cout << "command buffer overflow... truncating" << size << std::endl;
+		size = GetMaxMessageLength();
+	}
+	return size;
 }
 
 cCommand::eCommand cCommand::GetCommand() const
@@ -143,12 +178,62 @@ void cCommand::ClearRawBuffer()
 
 std::ostream& operator<<(std::ostream& stream, const cCommand& info)
 {
-	stream << "Command:" << std::endl;
-	stream << "    Total Length:   " << info.GetRawLength() << std::endl;
-	stream << "    Command:        " << info.GetCommand() << std::endl;
-	stream << "    UID:            " << info.GetUID() << std::endl;
-	stream << "    Room:           " << info.GetRoom() << std::endl;
-	stream << "    Message Length: " << info.GetMessageLength() << std::endl;
-	stream << "    Message:        " << info.GetTheMessage() << std::endl;
+	if (gDebug)
+	{
+		stream << "Command:" << std::endl;
+		stream << "    Total Length:   " << info.GetRawLength() << std::endl;
+		stream << "    Command:        " << info.GetCommand() << std::endl;
+		stream << "    UID:            " << info.GetUID() << std::endl;
+		stream << "    Room:           " << info.GetRoom() << std::endl;
+		stream << "    Message Length: " << info.GetMessageLength() << std::endl;
+		stream << "    Message:        " << info.GetTheMessage() << std::endl;
+	}
+	return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, cCommand::eCommand in)
+{
+	if (gDebug)
+	{
+		stream << (int)in << " (";
+		switch (in)
+		{
+		case cCommand::eNop:
+			stream << "eNop";
+			break;
+		case cCommand::eConnect:
+			stream << "eConnect";
+			break;
+		case cCommand::eConnected:
+			stream << "eConnected";
+			break;
+		case cCommand::eDisconnect:
+			stream << "eDisconnect";
+			break;
+		case cCommand::eDisconnected:
+			stream << "eDisconnected";
+			break;
+		case cCommand::eRoomCreate:
+			stream << "eRoomCreate";
+			break;
+		case cCommand::eRoomCreated:
+			stream << "eRoomCreated";
+			break;
+		case cCommand::eRoomConnect:
+			stream << "eRoomConnect";
+			break;
+		case cCommand::eRoomConnected:
+			stream << "eRoomConnected";
+			break;
+		case cCommand::eMessage:
+			stream << "eMessage";
+			break;
+		case cCommand::eUnknown:
+		default:
+			stream << "eUnknown";
+			break;
+		}
+		stream << ")";
+	}
 	return stream;
 }
