@@ -3,13 +3,12 @@ Name: Henry Van Horik
 Student: 0966956
 
 Targets available: Debug/Release/x64/x86
-Build directory example: "./{SolutionDir}/x64/Release"
+Build directory example: "./Project1/x64/Release"
 Application names:	server.exe client.exe
 [Build All] project will build everything you need
 
 **** NOTE - The server does a load of asserts checking for invalid incoming messages which will halt
 the program if you use the debug build.
-
 **** NOTE - The maximum buffer length has been set to 512 (beyond that your socket is shut down)
 **** NOTE - My protocol is nonstandard as noted below.
 **** NOTE - Your specifications said "Protocol Example" so I made my own protocol and
