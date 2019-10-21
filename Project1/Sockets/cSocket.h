@@ -22,6 +22,13 @@ public:
 	SOCKET GetID(); 
 
 protected:
+	// Hack - This should be in the chat command since it knows the internal protocol
+	// I don't want to rewrite the whole thing thoughs
+	// Do internal buffering for non-aligned recieves
+	char* m_recieveBuffer = NULL;
+	std::size_t m_recieveBufferLength;
+	char* m_currentPosition = NULL;
+
 	SOCKET m_id = INVALID_SOCKET;
 	bool m_isOpen;
 	int m_isConnected;

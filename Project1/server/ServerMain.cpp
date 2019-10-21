@@ -21,6 +21,7 @@
 #define NUMBER_CONNECTIONS 100
 
 bool gDebug = true;				// turn on global debug
+bool gDebugSend = false;		// turn on/off short packets
 
 using namespace std;
 

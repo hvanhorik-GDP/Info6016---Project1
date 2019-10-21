@@ -35,17 +35,17 @@ public:
 		tUID uid, 
 		tRoom room, 
 		const char* message,
-		unsigned short size);
+		unsigned short size);				// Message length
 	cCommand(
 		const char* rawBuffer,
-		unsigned short size);
+		unsigned long size);				// Raw buffer length
 
 	cCommand();
 	~cCommand();
 
 	tUID GetMaxID();
 	tRoom GetMaxRooms();
-	static unsigned short GetMaxRawLength();
+	static unsigned long GetMaxRawLength();
 	static unsigned short GetMaxMessageLength();
 	static unsigned short GetHeaderLength();
 
@@ -53,16 +53,19 @@ public:
 	cCommand::tUID GetUID() const;
 	cCommand::tRoom GetRoom() const;
 	const char* GetRawMessage() const;
-	unsigned short GetRawLength() const;
+	unsigned long GetRawLength() const;
 	unsigned short GetMessageLength() const;
 	const char* GetTheMessage() const;
 
 	friend std::ostream& operator<<(std::ostream& stream, const cCommand& info);
 
+	static void PackuShortBE(char* buffer, unsigned short value);
+	static unsigned short UnPackuShortBE(char* buffer);
+	static void PackuLongBE(char* buffer, unsigned long value);
+	static unsigned long UnPackuLongBE(char* buffer);
+
 private:
 	void ClearRawBuffer();
-	static void PackBE(char* buffer, unsigned short value);
-	static unsigned short UnpackBE(char* buffer);
 
 	// Some static variables
 	static const std::size_t tBufferLength = 512;		// Make him work to check overflow
@@ -72,12 +75,12 @@ private:
 	// raw buffer
 	struct sRawBuffer
 	{
-		char			m_TotalLength[2];		// 2 bytes for a command
+		char			m_TotalLength[4];		// 4 bytes for a command length
 		char			m_Command;				// 1 bytes for command (even though its an enum)
 		char			m_uid[2];				// 2 bytes for UID
 		char			m_room[2];				// 2 bytes for a room
 		char			m_messageLength[2];		// 2 bytes for message length
-		static const std::size_t tHeaderLength = 2 + 1 + 2 + 2 + 2;
+		static const std::size_t tHeaderLength = 4 + 1 + 2 + 2 + 2;
 		char			m_message[tBufferLength - tHeaderLength];	// The message - total - header
 		char			m_pad;					// Zero terminate padding
 	};

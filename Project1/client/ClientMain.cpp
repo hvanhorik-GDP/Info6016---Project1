@@ -23,6 +23,7 @@
 #define DEFAULT_PORT "5150"
 
 bool gDebug = false;		// turn off global debug
+bool gDebugSend = false;	// turn on/off short packets
 
 using namespace std;
 

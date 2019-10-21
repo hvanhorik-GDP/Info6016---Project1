@@ -11,49 +11,55 @@ cCommand::cCommand(
 	tUID uid, 
 	tRoom room,
 	const char* message,
-	unsigned short size)
+	unsigned short size)					// Message length
 	:  m_RawBuffer(new sRawBuffer())
 {
 	if (size > GetMaxMessageLength())
 	{
+		// This should have been handled
+		assert(false);
 		std::cout << "command buffer overflow... truncating" << size << std::endl;
 		size = GetMaxMessageLength();
 	}
 	ClearRawBuffer();
 	m_RawBuffer->m_Command = command;
-	PackBE(m_RawBuffer->m_uid, uid);
-	PackBE(m_RawBuffer->m_room, room);
-	PackBE(m_RawBuffer->m_messageLength, size);
+	PackuShortBE(m_RawBuffer->m_uid, uid);
+	PackuShortBE(m_RawBuffer->m_room, room);
+	PackuShortBE(m_RawBuffer->m_messageLength, size);
 	std::memcpy(m_RawBuffer->m_message, message, size);
-	PackBE(m_RawBuffer->m_TotalLength, GetHeaderLength() + size);
+	PackuLongBE(m_RawBuffer->m_TotalLength, GetHeaderLength() + size);
 }
 
 cCommand::cCommand(
 	const char* rawBuffer,
-	unsigned short size)
+	unsigned long size)							// Raw buffer length
 	: m_RawBuffer(new sRawBuffer())
 {
 	if (size > GetMaxRawLength())
 	{
+		// This should have been handled
+		assert(false);
 		std::cout << "command buffer overflow... truncating" << size << std::endl;
 		size = GetMaxRawLength();
 	}
 	memcpy(m_RawBuffer, rawBuffer, size);
 	// Lets do some checks on the buffer;
-	unsigned short sizeBuffer = UnpackBE(m_RawBuffer->m_TotalLength);
+	unsigned long sizeBuffer = UnPackuLongBE(m_RawBuffer->m_TotalLength);
 	if (sizeBuffer > GetMaxRawLength())
 	{
+		assert(false);
 		std::cout << "command buffer overflow... truncating" << sizeBuffer << std::endl;
 		size = GetMaxRawLength();
 	}
 	assert(size <= GetMaxRawLength());
 	eCommand command = (eCommand)m_RawBuffer->m_Command;
 	assert(command <= eMaxMessage);
-	tUID uid = UnpackBE(m_RawBuffer->m_uid);
-	tRoom room = UnpackBE(m_RawBuffer->m_room);
-	unsigned short messageLength = UnpackBE(m_RawBuffer->m_messageLength);
+	tUID uid = UnPackuShortBE(m_RawBuffer->m_uid);
+	tRoom room = UnPackuShortBE(m_RawBuffer->m_room);
+	unsigned short messageLength = UnPackuShortBE(m_RawBuffer->m_messageLength);
 	if (messageLength > GetMaxMessageLength())
 	{
+		assert(false);
 		std::cout << "command buffer overflow... truncating" << messageLength << std::endl;
 		messageLength = GetMaxMessageLength();
 	}
@@ -64,7 +70,7 @@ cCommand::cCommand()
 	:  m_RawBuffer(new sRawBuffer())
 {
 	ClearRawBuffer();		// This initializes everything properly
-	PackBE(m_RawBuffer->m_TotalLength, GetHeaderLength() + 2); // Just a NOP with no data
+	PackuShortBE(m_RawBuffer->m_TotalLength, GetHeaderLength() + 2); // Just a NOP with no data
 }
 
 cCommand::~cCommand() 
@@ -84,9 +90,9 @@ const char* cCommand::GetRawMessage() const
 	return (const char*)m_RawBuffer;
 }
 
-unsigned short cCommand::GetRawLength() const
+unsigned long cCommand::GetRawLength() const
 {
-	auto size = UnpackBE(m_RawBuffer->m_TotalLength);
+	auto size = UnPackuLongBE(m_RawBuffer->m_TotalLength);
 	// Check for overflow
 	if (size > GetMaxRawLength())
 	{
@@ -105,7 +111,7 @@ const char* cCommand::GetTheMessage() const
 
 unsigned short cCommand::GetMessageLength() const
 {
-	auto size = UnpackBE(m_RawBuffer->m_messageLength);
+	auto size = UnPackuShortBE(m_RawBuffer->m_messageLength);
 	// Check for overflow
 	if (size > GetMaxMessageLength())
 	{
@@ -122,29 +128,55 @@ cCommand::eCommand cCommand::GetCommand() const
 
 cCommand::tUID cCommand::GetUID() const
 {
-	return UnpackBE(m_RawBuffer->m_uid);
+	return UnPackuShortBE(m_RawBuffer->m_uid);
 }
 
 cCommand::tRoom cCommand::GetRoom() const
 {
-	return UnpackBE(m_RawBuffer->m_room);
+	return UnPackuShortBE(m_RawBuffer->m_room);
 }
 
 // Helper static methods
 
-void cCommand::PackBE(char* buffer, unsigned short value)
+void cCommand::PackuShortBE(char* buffer, unsigned short value)
 {
 	buffer[0] = value >> 8;	// 00000000 00000000 [01010101] 11110000
 	buffer[1] = value >> 0;	// 00000000 00000000 01010101 [11110000]
 }
 
 
+unsigned short cCommand::UnPackuShortBE(char* buffer)
+{
+	unsigned short value = 0;
+	value |= buffer[0] << 8;		// 11110000 01010101 [00000000] 00000000
+	value |= buffer[1] << 0;		// 11110000 01010101 00000000 [00000000]
+	return value;
+}
+
+void cCommand::PackuLongBE(char* buffer, unsigned long value)
+{
+	buffer[0] = char(value >> 24);
+	buffer[1] = char(value >> 16);
+	buffer[2] = char(value >> 8);	// 00000000 00000000 [01010101] 11110000
+	buffer[3] = char(value >> 0);	// 00000000 00000000 01010101 [11110000]
+
+}
+unsigned long cCommand::UnPackuLongBE(char* buffer)
+{
+	unsigned short value = 0;
+	value |= buffer[0] << 24;		// 11110000 01010101 [00000000] 00000000
+	value |= buffer[1] << 16;		// 11110000 01010101 00000000 [00000000]
+	value |= buffer[2] << 8;		// 11110000 01010101 [00000000] 00000000
+	value |= buffer[3] << 0;		// 11110000 01010101 00000000 [00000000]
+	return value;
+}
+
 unsigned short cCommand::GetMaxMessageLength()
 {
 	return tBufferLength - GetHeaderLength();
 }
 
-unsigned short cCommand::GetMaxRawLength()
+unsigned long cCommand::GetMaxRawLength()
 {
 	return tBufferLength;
 }
@@ -160,13 +192,6 @@ unsigned short cCommand::GetMaxRooms()
 	return std::numeric_limits<tRoom>::max() - 1;
 }
 
-unsigned short cCommand::UnpackBE(char* buffer)
-{
-	unsigned short value = 0;
-	value |= buffer[0] << 8;		// 11110000 01010101 [00000000] 00000000
-	value |= buffer[1] << 0;		// 11110000 01010101 00000000 [00000000]
-	return value;
-}
 
 void cCommand::ClearRawBuffer()
 {

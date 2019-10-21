@@ -3,15 +3,40 @@ Name: Henry Van Horik
 Student: 0966956
 
 Targets available: Debug/Release/x64/x86
-Build directory example: "./Project1\x64\Debug"
+Build directory example: "./Project1\x64\Release"
 Application names:	server.exe client.exe
 [Build All] project will build everything you need
+
+**** NOTE - The server does a load of asserts checking for invalid incoming messages which will halt
+the program if you use the debug build.
+
+**** NOTE - The maximum buffer length has been set to 512 (beyond that your socket is shut down)
+**** NOTE - My protocol is nonstandard as noted below.
+
+ Protocol (All messages are identical and unused fields are ignored):
+                                                Header 
+    uLong          char       uShort   uShort      uShort        char[]  
+[packet_length] [message_id] [User ID][Room ID][Message Length][Message]
+
+Valid commands are:
+		eNop = 0,
+		eConnect,				- User
+		eConnected,				- Server
+		eDisconnect,			- User
+		eDisconnected,			- Server
+		eRoomCreate,			- User
+		eRoomCreated,			- Server
+		eRoomConnect,			- User
+		eRoomConnected,			- Server
+		eRoomLeave,				- User
+		eRoomLeft,			  	- Server
+		eMessage,				- User/Server
 
 To run:
    Launch server.exe
    Launch: client.exe (multiple copies)
 Commands:
-      help           - This message
+       help           - This message
        connect {name} - connect as user name
        disconnect     - disconnect from the system
        create {name}  - Create a new room with {name}
@@ -20,6 +45,7 @@ Commands:
        users          - list users
        rooms          - list rooms
        exit           - Exit the program
+
 
 Example:
 	Command: connect henry2     		// connecting
@@ -46,25 +72,6 @@ Example:
 	User ID: 5 Name: henry
 	(henry) Command:
 
- Protocol:
-                                                Header 
-    uShort         char       uShort   uShort      uShort        char[]  
-[packet_length] [message_id] [User ID][Room ID][Message Length][Message]
-
-Valid commands are:
-		eNop,
-		eConnect,				- User
-		eConnected,				- Server
-		eDisconnect,			- User
-		eDisconnected,			- Server
-		eRoomCreate,			- User
-		eRoomCreated,			- Server
-		eRoomConnect,			- User
-		eRoomConnected,			- Server
-		eRoomLeave,				- User
-		eRoomLeft,			  	- Server
-		eMessage,				- User/Server
-
 The protocol is async. 
 You send a connection request , (eConnect) and the server responds with a (eConnected)
 
@@ -75,7 +82,9 @@ When you eConnect to the system, all users and rooms are broadcast to you for pa
 I had made an early design decision to just pass UID and Room IDs rather than strings containing 
 the user and room names. I figured this would be less wasteful. Each user keeps an active list 
 of UID/Name and Room/Name maps on their system. That’s why the server will broadcast all users 
-and names on your eConnect. Probably would design it differently in the future but I was stuck.
+and names on your eConnect. 
+
+NOTE - **Probably would design it differently in the future but I was stuck.
 
 Both server and client are non-blocking.
 

@@ -305,7 +305,7 @@ void cChat_Server::Process( int connections, const std::string& port)
 			}
 			wedidSomething = true;		// No sleep
 			blockingmsg = false;
-			cCommand command(recBuffer, (unsigned short)recieved);
+			cCommand command(recBuffer, recieved);
 			cout << command;
 			auto cmd = command.GetCommand();
 			switch (cmd)
